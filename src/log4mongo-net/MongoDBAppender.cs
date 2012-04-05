@@ -80,11 +80,15 @@ namespace log4net.Appender
         protected const int DEFAULT_MONGO_PORT = 27017;
         protected const string DEFAULT_DB_NAME = "log4net_mongodb";
         protected const string DEFAULT_COLLECTION_NAME = "logs";
+        protected const int DEFAULT_CONNECTION_TIMEOUT = 1000;
+        protected const int DEFAULT_SOCKET_TIMEOUT = 1000;
 
         private string hostname = DEFAULT_MONGO_HOST;
         private int port = DEFAULT_MONGO_PORT;
         private string dbName = DEFAULT_DB_NAME;
         private string collectionName = DEFAULT_COLLECTION_NAME;
+        private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
+        private int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
 
         protected MongoServer connection;
         protected MongoCollection collection;
@@ -171,12 +175,20 @@ namespace log4net.Appender
         /// <summary>
         /// MongoDB connection timeout in milliseconds
         /// </summary>
-        public int? ConnectTimeout { get; set; }
+        public int ConnectTimeout 
+        {
+            get { return connectionTimeout; }
+            set { connectionTimeout = value; }
+        }
 
         /// <summary>
         /// MongoDB socket timeout in milliseconds
         /// </summary>
-        public int? SocketTimeout { get; set; }
+        public int SocketTimeout
+        {
+            get { return socketTimeout; }
+            set { socketTimeout = value; }
+        }
 
         #endregion
 
@@ -191,16 +203,8 @@ namespace log4net.Appender
                     mongoConnectionString.AppendFormat(";Username={0};Password={1}", UserName, Password);
                 }
 
-                if (ConnectTimeout != null && ConnectTimeout.Value > 0)
-                {
-                    mongoConnectionString.AppendFormat(";connectTimeoutMS={0}", ConnectTimeout.Value);
-                }
-
-                if (SocketTimeout != null && SocketTimeout.Value > 0)
-                {
-                    mongoConnectionString.AppendFormat(";socketTimeoutMS={0}", SocketTimeout.Value);
-                }
-
+                mongoConnectionString.AppendFormat(";connectTimeoutMS={0};socketTimeoutMS={1}", ConnectTimeout, SocketTimeout);
+                
                 connection = MongoServer.Create(mongoConnectionString.ToString());
                 connection.Connect();
                 var db = connection.GetDatabase(DatabaseName);
