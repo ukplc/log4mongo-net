@@ -168,6 +168,16 @@ namespace log4net.Appender
         /// </summary>
         public string Password { get; set; }
 
+        /// <summary>
+        /// MongoDB connection timeout in milliseconds
+        /// </summary>
+        public int? ConnectTimeout { get; set; }
+
+        /// <summary>
+        /// MongoDB socket timeout in milliseconds
+        /// </summary>
+        public int? SocketTimeout { get; set; }
+
         #endregion
 
         public override void ActivateOptions()
@@ -179,6 +189,16 @@ namespace log4net.Appender
                 {
                     // use MongoDB authentication
                     mongoConnectionString.AppendFormat(";Username={0};Password={1}", UserName, Password);
+                }
+
+                if (ConnectTimeout != null && ConnectTimeout.Value > 0)
+                {
+                    mongoConnectionString.AppendFormat(";connectTimeoutMS={0}", ConnectTimeout.Value);
+                }
+
+                if (SocketTimeout != null && SocketTimeout.Value > 0)
+                {
+                    mongoConnectionString.AppendFormat(";socketTimeoutMS={0}", SocketTimeout.Value);
                 }
 
                 connection = MongoServer.Create(mongoConnectionString.ToString());
